@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.source.InvalidConfigurationPropertyValueException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Date;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -46,6 +49,7 @@ public class UserController {
     public ResponseEntity<User> updateUser(
             @PathVariable(value = "id") Long userId, @Validated @RequestBody User userDetails)
             throws InvalidConfigurationPropertyValueException {
+        Date date = new Date();
         User user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new InvalidConfigurationPropertyValueException("User not found on :: ", userId,
@@ -53,6 +57,20 @@ public class UserController {
         user.setEmail(userDetails.getEmail());
         user.setLastName(userDetails.getLastName());
         user.setFirstName(userDetails.getFirstName());
-        user.getUpdatedAt(new Date());
+        user.getUpdatedAt(date);
+        final User updateUser = userRepository.save(user);
+        return ResponseEntity.ok(updateUser);
+    }
+
+    @DeleteMapping("/user/{id}")
+    public Map<String, Boolean> deleteUser(@PathVariable(value = "id") Long userId) throws Exception {
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new InvalidConfigurationPropertyValueException("User not found on :: ", userId,
+                        "The specified resource does not exist."));
+        userRepository.delete(user);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("deleted", Boolean.TRUE);
+        return response;
     }
 }

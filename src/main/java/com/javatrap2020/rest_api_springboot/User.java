@@ -98,7 +98,7 @@ public class User {
         this.createdBy = createdBy;
     }
 
-    public Date getUpdatedAt() {
+    public Date getUpdatedAt(Date date) {
         return updatedAt;
     }
 
